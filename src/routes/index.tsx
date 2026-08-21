@@ -1,113 +1,117 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-import mugshotVance from "@/assets/mugshot-vance.jpg";
-import mugshotRhodes from "@/assets/mugshot-rhodes.jpg";
-import mugshotMarkovic from "@/assets/mugshot-markovic.jpg";
-import dossierRhodes from "@/assets/dossier-rhodes.jpg";
+import photoVance from "@/assets/officer-vance.jpg";
+import photoRhodes from "@/assets/officer-rhodes.jpg";
+import photoMarkovic from "@/assets/officer-markovic.jpg";
+import photoRhodesFull from "@/assets/officer-rhodes-full.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "LSPD — Baza danych obywateli i kartotek" },
+      { title: "LSPD — Baza funkcjonariuszy" },
       {
         name: "description",
         content:
-          "Wewnętrzny system kartotek LSPD: wyszukiwanie obywateli, nakazy aresztowania, historia kryminalna i rejestr pojazdów.",
+          "Wewnętrzna baza funkcjonariuszy LSPD: numery odznak, stopnie, jednostki, status służby i akta personalne.",
       },
-      { property: "og:title", content: "LSPD — Baza danych obywateli i kartotek" },
+      { property: "og:title", content: "LSPD — Baza funkcjonariuszy" },
       {
         property: "og:description",
         content:
-          "Wewnętrzny system kartotek LSPD: wyszukiwanie obywateli, nakazy, historia kryminalna i rejestr pojazdów.",
+          "Numery odznak, stopnie, jednostki, status służby i akta personalne funkcjonariuszy LSPD.",
       },
     ],
   }),
   component: Index,
 });
 
-type Status = "WANTED" | "CLEAR" | "PAROLE";
+type Duty = "NA SŁUŻBIE" | "PO SŁUŻBIE" | "SZKOLENIE";
 
-type Record = {
-  uid: string;
+type Officer = {
+  badge: string;
   name: string;
-  dob: string;
-  status: Status;
-  contact: string;
-  risk: number;
+  rank: string;
+  division: string;
+  duty: Duty;
+  since: string;
+  performance: number;
   photo: string;
 };
 
-const RECORDS: Record[] = [
+const OFFICERS: Officer[] = [
   {
-    uid: "#LS-88192-K",
+    badge: "#B-4471",
     name: "VANCE, ELIAS",
-    dob: "05-12-1981",
-    status: "WANTED",
-    contact: "2024-10-12 14:32",
-    risk: 90,
-    photo: mugshotVance,
+    rank: "Lieutenant",
+    division: "Wydział Detektywów",
+    duty: "NA SŁUŻBIE",
+    since: "2006-04-11",
+    performance: 92,
+    photo: photoVance,
   },
   {
-    uid: "#LS-77210-A",
+    badge: "#B-7821",
     name: "RHODES, SARAH",
-    dob: "11-03-1994",
-    status: "CLEAR",
-    contact: "2024-11-01 09:15",
-    risk: 20,
-    photo: mugshotRhodes,
+    rank: "Sergeant",
+    division: "Patrol — Mission Row",
+    duty: "NA SŁUŻBIE",
+    since: "2013-09-02",
+    performance: 88,
+    photo: photoRhodes,
   },
   {
-    uid: "#LS-91022-X",
+    badge: "#B-9105",
     name: "MARKOVIC, IVAN",
-    dob: "19-08-2001",
-    status: "PAROLE",
-    contact: "2024-10-28 22:44",
-    risk: 55,
-    photo: mugshotMarkovic,
+    rank: "Officer II",
+    division: "Akademia / Rekrut",
+    duty: "SZKOLENIE",
+    since: "2024-01-15",
+    performance: 54,
+    photo: photoMarkovic,
   },
 ];
 
-function StatusChip({ status }: { status: Status }) {
-  if (status === "WANTED") {
+function DutyChip({ duty }: { duty: Duty }) {
+  if (duty === "NA SŁUŻBIE") {
     return (
       <span className="border border-accent bg-accent/5 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-accent">
-        Wanted
+        Na służbie
       </span>
     );
   }
-  if (status === "PAROLE") {
+  if (duty === "SZKOLENIE") {
     return (
       <span className="border border-foreground/40 bg-muted px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-        Parole
+        Szkolenie
       </span>
     );
   }
   return (
     <span className="border border-foreground/30 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-foreground/70">
-      Clear
+      Po służbie
     </span>
   );
 }
 
-function riskColor(risk: number) {
-  if (risk >= 75) return "bg-destructive";
-  if (risk >= 40) return "bg-warning";
-  return "bg-success";
+function perfColor(v: number) {
+  if (v >= 75) return "bg-success";
+  if (v >= 50) return "bg-warning";
+  return "bg-destructive";
 }
 
 const NAV = [
-  { n: "01", label: "KARTOTEKI OBYWATELI" },
-  { n: "02", label: "REJESTR ZDARZEŃ" },
-  { n: "03", label: "MAGAZYN DOWODÓW" },
+  { n: "01", label: "KADRA FUNKCJONARIUSZY" },
+  { n: "02", label: "GRAFIK SŁUŻB" },
+  { n: "03", label: "SPRZĘT SŁUŻBOWY" },
 ];
 
 function Index() {
-  const [selected, setSelected] = useState("#LS-77210-A");
+  const [selected, setSelected] = useState("#B-7821");
   const [query, setQuery] = useState("");
 
-  const visible = RECORDS.filter((r) =>
-    (r.name + r.uid).toLowerCase().includes(query.toLowerCase()),
+  const visible = OFFICERS.filter((o) =>
+    (o.name + o.badge + o.division).toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
@@ -116,7 +120,7 @@ function Index() {
         <div className="border-b border-border p-6">
           <h1 className="font-display text-4xl tracking-wider text-accent">LSPD</h1>
           <p className="font-mono text-[10px] tracking-tighter text-muted-foreground">
-            SYSTEM KARTOTEK v4.0.2
+            BAZA FUNKCJONARIUSZY v4.0.2
           </p>
         </div>
 
@@ -141,20 +145,20 @@ function Index() {
         <div className="space-y-6 border-t border-border p-6">
           <div>
             <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-accent">
-              Aktywne alerty
+              Aktualnie w patrolu
             </p>
             <div className="flex items-end justify-between">
-              <span className="font-display text-5xl">14</span>
-              <span className="mb-2 font-mono text-[10px] text-muted-foreground">NAKAZY</span>
+              <span className="font-display text-5xl">42</span>
+              <span className="mb-2 font-mono text-[10px] text-muted-foreground">JEDNOSTEK</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="border-t border-border pt-2">
-              <p className="font-mono text-[9px] text-muted-foreground">FUNKCJONARIUSZE</p>
+              <p className="font-mono text-[9px] text-muted-foreground">KADRA OGÓŁEM</p>
               <p className="font-display text-xl">82</p>
             </div>
             <div className="border-t border-border pt-2">
-              <p className="font-mono text-[9px] text-muted-foreground">OCZEKUJĄCE</p>
+              <p className="font-mono text-[9px] text-muted-foreground">REKRUCI</p>
               <p className="font-display text-xl">07</p>
             </div>
           </div>
@@ -171,7 +175,7 @@ function Index() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="ID, NAZWISKO LUB NR REJESTRACYJNY..."
+              placeholder="NR ODZNAKI, NAZWISKO LUB JEDNOSTKA..."
               className="w-full border border-border bg-muted py-3 pl-24 pr-4 font-mono text-sm uppercase transition-colors placeholder:text-muted-foreground/50 focus:border-accent/50 focus:outline-none"
             />
           </div>
@@ -180,7 +184,7 @@ function Index() {
               FILTRY
             </button>
             <button className="bg-accent px-4 py-2 font-display text-xs tracking-widest text-accent-foreground transition-all hover:brightness-110">
-              NOWY WPIS
+              NOWY FUNKCJONARIUSZ
             </button>
           </div>
         </header>
@@ -189,7 +193,7 @@ function Index() {
           <table className="w-full border-collapse text-left">
             <thead className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
               <tr className="border-b border-border">
-                {["UID", "Dane obywatela", "Status", "Ostatni kontakt", "Ryzyko"].map((h) => (
+                {["ODZNAKA", "Funkcjonariusz", "Jednostka", "Status", "Ocena"].map((h) => (
                   <th
                     key={h}
                     className="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
@@ -200,24 +204,24 @@ function Index() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {visible.map((r) => {
-                const active = r.uid === selected;
+              {visible.map((o) => {
+                const active = o.badge === selected;
                 return (
                   <tr
-                    key={r.uid}
-                    onClick={() => setSelected(r.uid)}
+                    key={o.badge}
+                    onClick={() => setSelected(o.badge)}
                     className={
                       active
                         ? "cursor-pointer border-l-2 border-accent bg-primary/20 transition-colors hover:bg-primary/30"
                         : "cursor-pointer transition-colors hover:bg-muted"
                     }
                   >
-                    <td className="px-6 py-3 font-mono text-xs text-accent">{r.uid}</td>
+                    <td className="px-6 py-3 font-mono text-xs text-accent">{o.badge}</td>
                     <td className="px-6 py-3">
                       <div className="flex items-center gap-4">
                         <img
-                          src={r.photo}
-                          alt={`Zdjęcie policyjne: ${r.name}`}
+                          src={o.photo}
+                          alt={`Zdjęcie służbowe: ${o.name}`}
                           loading="lazy"
                           width={512}
                           height={512}
@@ -231,23 +235,23 @@ function Index() {
                                 : "font-display text-lg tracking-wide"
                             }
                           >
-                            {r.name}
+                            {o.name}
                           </p>
                           <p className="font-mono text-[10px] text-muted-foreground">
-                            DOB: {r.dob}
+                            {o.rank} · od {o.since}
                           </p>
                         </div>
                       </div>
                     </td>
+                    <td className="px-6 py-3 text-xs text-foreground/80">{o.division}</td>
                     <td className="px-6 py-3">
-                      <StatusChip status={r.status} />
+                      <DutyChip duty={o.duty} />
                     </td>
-                    <td className="px-6 py-3 font-mono text-xs">{r.contact}</td>
                     <td className="px-6 py-3">
                       <div className="h-1 w-12 overflow-hidden bg-muted">
                         <div
-                          className={`h-full ${riskColor(r.risk)}`}
-                          style={{ width: `${r.risk}%` }}
+                          className={`h-full ${perfColor(o.performance)}`}
+                          style={{ width: `${o.performance}%` }}
                         />
                       </div>
                     </td>
@@ -263,18 +267,18 @@ function Index() {
         <div className="flex items-start justify-between border-b border-border p-6">
           <div>
             <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-accent">
-              Akta sprawy
+              Akta personalne
             </p>
-            <h2 className="font-display text-4xl">SARAH RHODES</h2>
+            <h2 className="font-display text-4xl">SGT. SARAH RHODES</h2>
           </div>
-          <span className="border border-border p-1 font-mono text-[10px]">REC_77210A</span>
+          <span className="border border-border p-1 font-mono text-[10px]">B-7821</span>
         </div>
 
         <div className="flex-1 space-y-8 overflow-auto p-8">
           <div className="flex gap-6">
             <img
-              src={dossierRhodes}
-              alt="Zdjęcie policyjne Sarah Rhodes"
+              src={photoRhodesFull}
+              alt="Zdjęcie służbowe sierżant Sarah Rhodes"
               width={512}
               height={640}
               className="w-40 border-2 border-accent/30 object-cover ring-4 ring-black/20"
@@ -282,68 +286,68 @@ function Index() {
             <div className="flex-1 space-y-4">
               <div>
                 <p className="font-mono text-[9px] uppercase text-muted-foreground">
-                  Aktualny status
+                  Status służby
                 </p>
-                <p className="font-display text-xl text-accent">BRAK NAKAZÓW</p>
+                <p className="font-display text-xl text-accent">NA SŁUŻBIE — PATROL</p>
               </div>
               <div>
                 <p className="font-mono text-[9px] uppercase text-muted-foreground">
-                  Ostatni znany adres
+                  Przydział
                 </p>
                 <p className="text-sm leading-tight text-foreground/90">
-                  322 Altair St, Apt 4C
+                  Mission Row Station
                   <br />
-                  Little Seoul, Los Santos
+                  Jednostka 1-ADAM-12
                 </p>
               </div>
               <div>
                 <p className="font-mono text-[9px] uppercase text-muted-foreground">
-                  Prawo jazdy
+                  Certyfikaty
                 </p>
-                <p className="text-xs text-success">WAŻNE (DO 2026)</p>
+                <p className="text-xs text-success">TASER · SWAT-BASIC · MEDIC</p>
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
             <h3 className="border-b border-border pb-1 font-display text-lg tracking-widest">
-              HISTORIA KRYMINALNA
+              PRZEBIEG SŁUŻBY
             </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between border border-border bg-muted p-3">
                 <div>
-                  <p className="font-mono text-[10px] text-accent">2023-AR-409</p>
-                  <p className="text-xs">POSIADANIE SUBSTANCJI KONTROLOWANYCH</p>
+                  <p className="font-mono text-[10px] text-accent">2022-PR-118</p>
+                  <p className="text-xs">AWANS NA STOPIEŃ SIERŻANTA</p>
                 </div>
-                <span className="font-mono text-[9px] text-muted-foreground">UMORZONE</span>
+                <span className="font-mono text-[9px] text-muted-foreground">ZATWIERDZONE</span>
               </div>
               <div className="flex items-center justify-between border border-border bg-muted p-3">
                 <div>
-                  <p className="font-mono text-[10px] text-accent">2021-AR-112</p>
-                  <p className="text-xs">NIEBEZPIECZNA JAZDA (PRZESTĘPSTWO)</p>
+                  <p className="font-mono text-[10px] text-accent">2019-CM-042</p>
+                  <p className="text-xs">MEDAL ZA ODWAGĘ W SŁUŻBIE</p>
                 </div>
-                <span className="font-mono text-[9px] text-muted-foreground">WINNA / NADZÓR</span>
+                <span className="font-mono text-[9px] text-muted-foreground">ODZNACZENIE</span>
               </div>
             </div>
           </div>
 
           <div className="space-y-4 opacity-50">
             <h3 className="border-b border-border pb-1 font-display text-lg tracking-widest">
-              REJESTR POJAZDÓW
+              POJAZD SŁUŻBOWY
             </h3>
             <div className="flex items-center gap-4 font-mono text-xs">
-              <span className="border border-border bg-primary px-2 py-1">44XJA102</span>
-              <span>Declasse Granger (biały)</span>
+              <span className="border border-border bg-primary px-2 py-1">LSPD-1412</span>
+              <span>Vapid Scout (radiowóz)</span>
             </div>
           </div>
         </div>
 
         <div className="flex gap-4 border-t border-border bg-primary/20 p-6">
           <button className="flex-1 bg-accent py-3 font-display text-sm tracking-widest text-accent-foreground">
-            WYSTAW NAKAZ
+            PRZYDZIEL SŁUŻBĘ
           </button>
           <button className="flex-1 border border-border py-3 font-display text-xs tracking-widest hover:bg-muted">
-            EDYTUJ WPIS
+            EDYTUJ AKTA
           </button>
         </div>
       </aside>
